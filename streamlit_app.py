@@ -4,6 +4,15 @@ import requests
 import snowflake.connector
 from urllib.error import URLError
 
+my_cnx = snowflake.connector.connect(
+  user = streamlit.secrets["snowflake"]["user"],
+  password = streamlit.secrets["snowflake"]["password"],
+  account = streamlit.secrets["snowflake"]["account"],
+  warehouse = streamlit.secrets["snowflake"]["warehouse"],
+  database = streamlit.secrets["snowflake"]["database"],
+  schema = streamlit.secrets["snowflake"]["schema"],
+)
+
 streamlit.title('My Parents New Healthy Diner')
 streamlit.header('Breakfast Menu')
 streamlit.text('🥣 Omega 3 & Blueberry Oatmeal')
@@ -38,25 +47,19 @@ try:
     streamlit.dataframe(back_from_function)
 except URLError as e:
     streamlit.error()
-    
-streamlit.stop()
 
-
-
-my_cnx = snowflake.connector.connect(
-  user = streamlit.secrets["snowflake"]["user"],
-  password = streamlit.secrets["snowflake"]["password"],
-  account = streamlit.secrets["snowflake"]["account"],
-  warehouse = streamlit.secrets["snowflake"]["warehouse"],
-  database = streamlit.secrets["snowflake"]["database"],
-  schema = streamlit.secrets["snowflake"]["schema"],
-)
-
-my_cur = my_cnx.cursor()
-my_cur.execute("select * from fruit_load_list")
-my_data_rows = my_cur.fetchall()
 streamlit.header("The fruit load list contains:")
-streamlit.dataframe(my_data_rows)
+
+def get_fruit_load_list():
+  my_cur = my_cnx.cursor()
+  my_cur.execute("select * from fruit_load_list")
+  return my_cur.fetchall()
+
+if streamlit.button("Get Fruit Load List"):
+  my_data_rows = get_fruit_list()
+  streamlit.dataframe(my_data_rows)
+
+streamlit.stop()
 
 # Let's put a pick list here so they can pick the fruit they want to include 
 new_fruits_selected = streamlit.multiselect("What fruit would you like to add?", list(my_data_rows))
