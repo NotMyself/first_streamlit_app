@@ -34,7 +34,15 @@ streamlit.dataframe(fruityvice_normalized)
 
 import snowflake.connector
 
-my_cnx = snowflake.connector.connect(**streamlit.secrets["snowflake"])
+my_cnx = snowflake.connector.connect(
+  user = streamlit.secrets["snowflake"]["user"],
+  password = streamlit.secrets["snowflake"]["password"],
+  account = streamlit.secrets["snowflake"]["account"],
+  warehouse = streamlit.secrets["snowflake"]["warehouse"],
+  database = streamlit.secrets["snowflake"]["database"],
+  schema = streamlit.secrets["snowflake"]["schema"],
+)
+
 my_cur = my_cnx.cursor()
 my_cur.execute("SELECT CURRENT_USER(), CURRENT_ACCOUNT(), CURRENT_REGION()")
 my_data_row = my_cur.fetchone()
